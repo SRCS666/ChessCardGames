@@ -8,13 +8,4 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CCGLogic\CCGLogic.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Games\Chess\" />
-    <Folder Include="Games\Xiangqi\" />
-  </ItemGroup>
-
 </Project>

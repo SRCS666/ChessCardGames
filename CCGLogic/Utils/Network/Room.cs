@@ -1,4 +1,4 @@
-﻿namespace CCGServer.Utils.Network
+﻿namespace CCGLogic.Utils.Network
 {
     public abstract class Room
     {
