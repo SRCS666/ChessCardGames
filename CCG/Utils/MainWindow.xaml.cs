@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace CCG
+namespace CCG.Utils
 {
     public partial class MainWindow : Window
     {

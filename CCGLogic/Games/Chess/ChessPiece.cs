@@ -41,10 +41,9 @@ namespace CCGLogic.Games.Chess
 
         public abstract IEnumerable<ChessMove> GetMoves();
 
-        protected bool CanMoveTo(GridPosition pos) =>
-            board.IsInside(pos) && board.IsEmpty(pos);
-        protected bool CanCaptureAt(GridPosition pos) =>
-            board.IsInside(pos) && !board.IsEmpty(pos) && board[pos].Color != Color;
+        protected bool CanMoveTo(GridPosition pos) => board.IsInside(pos) && board.IsEmpty(pos);
+        protected bool CanCaptureAt(GridPosition pos) => board.IsInside(pos) && !board.IsEmpty(pos) && board[pos].Color != Color;
+        protected bool CanMoveToOrCaptureAt(GridPosition pos) => CanMoveTo(pos) || CanCaptureAt(pos);
 
         private IEnumerable<GridPosition> MultiStepMovePositionsInDir(GridDirection dir)
         {
@@ -63,6 +62,17 @@ namespace CCGLogic.Games.Chess
                 break;
             }
         }
+
+        protected IEnumerable<GridPosition> MultiStepMovePositionsInDirs(IEnumerable<GridDirection> dirs) =>
+            dirs.SelectMany(MultiStepMovePositionsInDir);
+    }
+
+    public abstract class MultiStepPiece(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
+    {
+        public abstract IEnumerable<GridDirection> Directions { get; }
+
+        public override IEnumerable<ChessMove> GetMoves() => MultiStepMovePositionsInDirs(Directions)
+            .Select(to => new NormalMove(board, Position, to));
     }
 
     public class King(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
@@ -75,44 +85,45 @@ namespace CCGLogic.Games.Chess
         }
     }
 
-    public class Queen(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
+    public class Queen(ChessBoard board, ChessPieceColor color) : MultiStepPiece(board, color)
     {
         public override ChessPieceType Type => ChessPieceType.Queen;
 
-        public override IEnumerable<ChessMove> GetMoves()
-        {
-            return [];
-        }
+        public override IEnumerable<GridDirection> Directions => GridDirection.EightDirections;
     }
 
-    public class Bishop(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
+    public class Bishop(ChessBoard board, ChessPieceColor color) : MultiStepPiece(board, color)
     {
         public override ChessPieceType Type => ChessPieceType.Bishop;
 
-        public override IEnumerable<ChessMove> GetMoves()
-        {
-            return [];
-        }
+        public override IEnumerable<GridDirection> Directions => GridDirection.DiagonalDirections;
     }
 
     public class Knight(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
     {
         public override ChessPieceType Type => ChessPieceType.Knight;
 
-        public override IEnumerable<ChessMove> GetMoves()
+        private IEnumerable<GridPosition> PotentialMovePositionsForKnight()
         {
-            return [];
+            foreach (GridDirection vDir in GridDirection.NorthAndSouth)
+            {
+                foreach (GridDirection hDir in GridDirection.EastAndWest)
+                {
+                    yield return Position + 2 * vDir + hDir;
+                    yield return Position + 2 * hDir + vDir;
+                }
+            }
         }
+
+        public override IEnumerable<ChessMove> GetMoves() => PotentialMovePositionsForKnight()
+            .Where(CanMoveToOrCaptureAt).Select(to => new NormalMove(board, Position, to));
     }
 
-    public class Rook(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
+    public class Rook(ChessBoard board, ChessPieceColor color) : MultiStepPiece(board, color)
     {
         public override ChessPieceType Type => ChessPieceType.Rook;
 
-        public override IEnumerable<ChessMove> GetMoves()
-        {
-            return [];
-        }
+        public override IEnumerable<GridDirection> Directions => GridDirection.StraightDirections;
     }
 
     public class Pawn(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)

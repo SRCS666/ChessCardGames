@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using CCG.Utils;
+using System.Windows;
 
 namespace CCG
 {

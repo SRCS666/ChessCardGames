@@ -2,5 +2,11 @@
 {
     public class Server
     {
+        private readonly ServerSocket serverSocket;
+
+        public Server()
+        {
+            serverSocket = new();
+        }
     }
 }

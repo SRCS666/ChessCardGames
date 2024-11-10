@@ -4,7 +4,5 @@
     {
         public ChessBoard Board { get; }
         public ChessPieceColor CurrentPlayer { get; private set; }
-
-        private void ChangePlayer() => CurrentPlayer = CurrentPlayer.Opponent();
     }
 }
