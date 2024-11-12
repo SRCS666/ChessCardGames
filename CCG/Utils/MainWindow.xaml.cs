@@ -2,6 +2,7 @@
 using CCG.Utils.Network;
 using CCGLogic.Games.Chess;
 using CCGLogic.Utils.Network;
+using System.Text.Json.Nodes;
 using System.Windows;
 
 namespace CCG.Utils
@@ -24,7 +25,10 @@ namespace CCG.Utils
 
         public void AddToGame()
         {
-            ChangeToGameScene();
+            client = new ChessClient();
+            client.Signedup += SignupResult;
+
+            client.Connect();
         }
 
         public void StartServer()
@@ -59,10 +63,28 @@ namespace CCG.Utils
 
         private void ChangeToGameScene()
         {
-            MenuItemAddToGame.IsEnabled = false;
-            MenuItemStartServer.IsEnabled = false;
+            Dispatcher.Invoke(() =>
+            {
+                MenuItemAddToGame.IsEnabled = false;
+                MenuItemStartServer.IsEnabled = false;
 
-            CCGScene.Content = new ChessScene(this, client as ChessClient);
+                CCGScene.Content = new ChessScene(this, client as ChessClient);
+            });
+        }
+
+        private void SignupResult(Client client, JsonArray arguments)
+        {
+            SignupResultType result = (SignupResultType)arguments[0].GetValue<int>();
+
+            if (result == SignupResultType.Successed)
+            {
+                ChangeToGameScene();
+            }
+            else
+            {
+                string reason = arguments[1].GetValue<string>();
+                MessageBox.Show(this, reason, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

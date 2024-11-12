@@ -42,6 +42,7 @@ namespace CCGLogic.Utils.Network
             }
             catch (Exception ex)
             {
+                Disconnect();
                 ErrorMessage?.Invoke(ex.Message);
             }
         }

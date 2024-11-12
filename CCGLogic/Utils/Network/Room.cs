@@ -12,5 +12,6 @@
         private readonly List<ServerPlayer> players = [];
 
         public IEnumerable<ServerPlayer> GetPlayers() => players;
+        public bool IsFull() => players.Count == MaxPlayerCount;
     }
 }

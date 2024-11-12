@@ -19,7 +19,8 @@ namespace CCGLogic.Utils
 
     public enum CmdOperation
     {
-        COSignup
+        COSignup,
+        COSignupResult
     }
 
     public class Command(CmdWhere source, CmdWhere destination, CmdType type,

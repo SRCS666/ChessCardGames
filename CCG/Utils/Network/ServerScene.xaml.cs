@@ -14,6 +14,11 @@ namespace CCG.Utils.Network
 
             this.mainWindow = mainWindow;
             this.server = server;
+
+            server.ServerMessage += LogServerMessage;
         }
+
+        private void LogServerMessage(string message) =>
+            Dispatcher.Invoke(() => TextBoxServerInfo.Text += $"{message}\n");
     }
 }

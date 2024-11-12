@@ -1,10 +1,20 @@
-﻿using System.Net;
+﻿using CCGLogic.Games.Chess;
+using CCGLogic.Games.Xiangqi;
+using System.Net;
 using System.Text.Json.Nodes;
 
 namespace CCGLogic.Utils.Network
 {
+    public enum SignupResultType
+    {
+        Successed,
+        Failed
+    }
+
     public class Server
     {
+        public event Action<string> ServerMessage;
+
         public IPEndPoint IPEndPoint => serverSocket.IPEndPoint;
         public IPAddress Address => serverSocket.Address;
         public int Port => serverSocket.Port;
@@ -36,9 +46,91 @@ namespace CCGLogic.Utils.Network
             clientSocket.SendMessage(command.ToBytes());
         }
 
+        private Room CreateNewRoom(GameType gameType, int roomNumber) => gameType switch
+        {
+            GameType.Chess => new ChessRoom(this, roomNumber),
+            GameType.Xiangqi => new XiangqiRoom(this, roomNumber),
+            _ => null
+        };
+
+        private IEnumerable<Room> AllRoomsForGame(GameType gameType) =>
+            rooms.Where(room => room.GameType == gameType);
+
         private void ProcessSignupRequest(ClientSocket clientSocket, byte[] request)
         {
+            Command command = Command.Parse(request);
 
+            if (command.Source != CmdWhere.CWClient)
+            {
+                ServerMessage?.Invoke(string.Format("Invalid message from unknown source"));
+                return;
+            }
+
+            clientSocket.MessageGot -= ProcessSignupRequest;
+
+            if (command.Operation != CmdOperation.COSignup)
+            {
+                clientSocket.Disconnect();
+                return;
+            }
+
+            JsonArray arguments = command.Arguments;
+            SignupType signupType = (SignupType)arguments[0].GetValue<int>();
+            GameType gameType = (GameType)arguments[1].GetValue<int>();
+            int roomNumber = arguments[2].GetValue<int>();
+            string screenName = arguments[3].GetValue<string>();
+
+            Room roomFound = null;
+            foreach (Room room in AllRoomsForGame(gameType))
+            {
+                if (room.RoomNumber == roomNumber)
+                {
+                    roomFound = room;
+                    break;
+                }
+            }
+
+            if (signupType == SignupType.CreateNewRoom)
+            {
+                if (roomFound == null)
+                {
+                    Room room = CreateNewRoom(gameType, roomNumber);
+                    rooms.Add(room);
+
+                    NotifySignupResult(clientSocket, SignupResultType.Successed);
+                }
+                else
+                {
+                    NotifySignupResult(clientSocket, SignupResultType.Failed, "This room is existed.");
+                }
+            }
+            else
+            {
+                if (roomFound != null)
+                {
+                    if (roomFound.IsFull())
+                    {
+                        NotifySignupResult(clientSocket, SignupResultType.Failed, "This room is full.");
+                    }
+                    else
+                    {
+                        NotifySignupResult(clientSocket, SignupResultType.Successed);
+                    }
+                }
+                else
+                {
+                    NotifySignupResult(clientSocket, SignupResultType.Failed, "This room is not existed.");
+                }
+            }
+        }
+
+        private static void NotifySignupResult(ClientSocket clientSocket, SignupResultType type, string reason = null)
+        {
+            JsonArray jsonArray = [];
+            jsonArray.Add(type);
+            jsonArray.Add(reason);
+
+            NotifyClient(clientSocket, CmdOperation.COSignupResult, jsonArray);
         }
     }
 }
