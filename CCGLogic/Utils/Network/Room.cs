@@ -13,5 +13,21 @@
 
         public IEnumerable<ServerPlayer> GetPlayers() => players;
         public bool IsFull() => players.Count == MaxPlayerCount;
+
+        public void SignupNewPlayer(ClientSocket clientSocket, string screenName)
+        {
+            ServerPlayer player = new(this)
+            {
+                ClientSocket = clientSocket
+            };
+            players.Add(player);
+
+            player.ClientCommandReceived += ProcessClientCommand;
+        }
+
+        private void ProcessClientCommand(ServerPlayer player, Command command)
+        {
+
+        }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using CCG.Games.Chess;
 using CCG.Utils.Network;
 using CCGLogic.Games.Chess;
+using CCGLogic.Utils;
 using CCGLogic.Utils.Network;
+using System.ComponentModel;
 using System.Text.Json.Nodes;
 using System.Windows;
 
@@ -33,6 +35,12 @@ namespace CCG.Utils
 
         public void StartServer()
         {
+            ServerConfigDialog dialog = new() { Owner = this };
+            if (!dialog.ShowDialog().Value)
+            {
+                return;
+            }
+
             server = new();
             if (!server.Start())
             {
@@ -44,14 +52,8 @@ namespace CCG.Utils
             ChangeToServerScene();
         }
 
-        public void ExitGame()
-        {
-            if (MessageBox.Show(this, "Do you really want to exit game?", "Init",
-                MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
-            {
-                Application.Current.Shutdown();
-            }
-        }
+        public void ExitGame() => Close();
+        private void Window_Closing(object sender, CancelEventArgs e) => Config.Instance.SaveConfig();
 
         private void ChangeToServerScene()
         {

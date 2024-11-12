@@ -21,7 +21,6 @@ namespace CCGLogic.Utils.Network
 
         private readonly ServerSocket serverSocket;
 
-        private readonly List<IPEndPoint> points = [];
         private readonly List<Room> rooms = [];
 
         public Server()
@@ -97,6 +96,7 @@ namespace CCGLogic.Utils.Network
                     Room room = CreateNewRoom(gameType, roomNumber);
                     rooms.Add(room);
 
+                    room.SignupNewPlayer(clientSocket, screenName);
                     NotifySignupResult(clientSocket, SignupResultType.Successed);
                 }
                 else
@@ -114,6 +114,7 @@ namespace CCGLogic.Utils.Network
                     }
                     else
                     {
+                        roomFound.SignupNewPlayer(clientSocket, screenName);
                         NotifySignupResult(clientSocket, SignupResultType.Successed);
                     }
                 }
