@@ -42,7 +42,6 @@ namespace CCGLogic.Utils.Network
             }
             catch (Exception ex)
             {
-                Disconnect();
                 ErrorMessage?.Invoke(ex.Message);
             }
         }
@@ -75,6 +74,12 @@ namespace CCGLogic.Utils.Network
             {
                 ErrorMessage?.Invoke(ex.Message);
             }
+        }
+
+        public void SendMessage(byte[] message)
+        {
+            NetworkStream stream = tcpClient.GetStream();
+            stream.Write(message, 0, message.Length);
         }
 
         private static IEnumerable<byte[]> SplitMessage(byte[] message)

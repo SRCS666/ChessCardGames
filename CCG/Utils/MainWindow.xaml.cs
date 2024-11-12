@@ -1,4 +1,6 @@
-﻿using CCG.Utils.Network;
+﻿using CCG.Games.Chess;
+using CCG.Utils.Network;
+using CCGLogic.Games.Chess;
 using CCGLogic.Utils.Network;
 using System.Windows;
 
@@ -7,6 +9,7 @@ namespace CCG.Utils
     public partial class MainWindow : Window
     {
         private Server server;
+        private Client client;
 
         public MainWindow()
         {
@@ -21,7 +24,7 @@ namespace CCG.Utils
 
         public void AddToGame()
         {
-
+            ChangeToGameScene();
         }
 
         public void StartServer()
@@ -52,6 +55,14 @@ namespace CCG.Utils
             MenuItemStartServer.IsEnabled = false;
 
             CCGScene.Content = new ServerScene(this, server);
+        }
+
+        private void ChangeToGameScene()
+        {
+            MenuItemAddToGame.IsEnabled = false;
+            MenuItemStartServer.IsEnabled = false;
+
+            CCGScene.Content = new ChessScene(this, client as ChessClient);
         }
     }
 }
