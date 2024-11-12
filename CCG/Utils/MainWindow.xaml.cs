@@ -6,6 +6,7 @@ using CCGLogic.Utils.Network;
 using System.ComponentModel;
 using System.Text.Json.Nodes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CCG.Utils
 {
@@ -27,11 +28,39 @@ namespace CCG.Utils
 
         public void AddToGame()
         {
+            AddToGameDialog dialog = new() { Owner = this };
+            if (!dialog.ShowDialog().Value)
+            {
+                return;
+            }
+
             client = new ChessClient();
             client.Signedup += SignupResult;
+            client.ErrorMessage += NetworkError;
 
-            client.Connect();
+            client.Connect(Config.Instance.AddToGameIP, Config.Instance.AddToGamePort);
         }
+
+        private void SignupResult(Client client, JsonArray arguments)
+        {
+            SignupResultType result = (SignupResultType)arguments[0].GetValue<int>();
+
+            if (result == SignupResultType.Successed)
+            {
+                ChangeToGameScene();
+            }
+            else
+            {
+                string reason = arguments[1].GetValue<string>();
+                MessageBox.Show(this, reason, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void NetworkError(string message) => Dispatcher.Invoke(() =>
+        {
+            MessageBox.Show(this, message, "Network error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        });
 
         public void StartServer()
         {
@@ -70,23 +99,13 @@ namespace CCG.Utils
                 MenuItemAddToGame.IsEnabled = false;
                 MenuItemStartServer.IsEnabled = false;
 
-                CCGScene.Content = new ChessScene(this, client as ChessClient);
+                UserControl control = Config.Instance.GameType switch
+                {
+                    GameType.Chess => new ChessScene(this, client as ChessClient),
+                    _ => null
+                };
+                CCGScene.Content = control;
             });
-        }
-
-        private void SignupResult(Client client, JsonArray arguments)
-        {
-            SignupResultType result = (SignupResultType)arguments[0].GetValue<int>();
-
-            if (result == SignupResultType.Successed)
-            {
-                ChangeToGameScene();
-            }
-            else
-            {
-                string reason = arguments[1].GetValue<string>();
-                MessageBox.Show(this, reason, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
         }
     }
 }

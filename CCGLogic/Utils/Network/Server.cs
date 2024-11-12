@@ -45,15 +45,23 @@ namespace CCGLogic.Utils.Network
             clientSocket.SendMessage(command.ToBytes());
         }
 
-        private Room CreateNewRoom(GameType gameType, int roomNumber) => gameType switch
+        private Room CreateNewRoom(GameType gameType, int roomNumber)
         {
-            GameType.Chess => new ChessRoom(this, roomNumber),
-            GameType.Xiangqi => new XiangqiRoom(this, roomNumber),
-            _ => null
-        };
+            Room room = gameType switch
+            {
+                GameType.Chess => new ChessRoom(this, roomNumber),
+                GameType.Xiangqi => new XiangqiRoom(this, roomNumber),
+                _ => null
+            };
+            room.ServerMessage += RoomServerMessage;
+            rooms.Add(room);
+
+            return room;
+        }
 
         private IEnumerable<Room> AllRoomsForGame(GameType gameType) =>
             rooms.Where(room => room.GameType == gameType);
+        private void RoomServerMessage(string message) => ServerMessage?.Invoke(message);
 
         private void ProcessSignupRequest(ClientSocket clientSocket, byte[] request)
         {
@@ -79,22 +87,12 @@ namespace CCGLogic.Utils.Network
             int roomNumber = arguments[2].GetValue<int>();
             string screenName = arguments[3].GetValue<string>();
 
-            Room roomFound = null;
-            foreach (Room room in AllRoomsForGame(gameType))
-            {
-                if (room.RoomNumber == roomNumber)
-                {
-                    roomFound = room;
-                    break;
-                }
-            }
-
+            Room roomFound = AllRoomsForGame(gameType).FirstOrDefault(room => room.RoomNumber == roomNumber);
             if (signupType == SignupType.CreateNewRoom)
             {
                 if (roomFound == null)
                 {
                     Room room = CreateNewRoom(gameType, roomNumber);
-                    rooms.Add(room);
 
                     room.SignupNewPlayer(clientSocket, screenName);
                     NotifySignupResult(clientSocket, SignupResultType.Successed);

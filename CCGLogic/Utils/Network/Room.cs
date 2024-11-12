@@ -2,6 +2,8 @@
 {
     public abstract class Room(Server server, int roomNumber)
     {
+        public event Action<string> ServerMessage;
+
         public abstract GameType GameType { get; }
         public abstract int MaxPlayerCount { get; }
 
@@ -21,6 +23,8 @@
                 ClientSocket = clientSocket
             };
             players.Add(player);
+
+            ServerMessage?.Invoke(string.Format("{0}:{1} connected.", clientSocket.RemoteAddress, clientSocket.RemotePort));
 
             player.ClientCommandReceived += ProcessClientCommand;
         }

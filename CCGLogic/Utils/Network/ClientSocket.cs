@@ -60,9 +60,6 @@ namespace CCGLogic.Utils.Network
             }
         }
 
-        public void Connect(IPAddress address) => Connect(address, Config.DefaultPort);
-        public void Connect() => Connect(IPAddress.Loopback);
-
         public void Disconnect()
         {
             try

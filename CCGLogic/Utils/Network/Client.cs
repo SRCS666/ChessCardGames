@@ -38,18 +38,14 @@ namespace CCGLogic.Utils.Network
         }
 
         public void SendMessage(byte[] bytes) => clientSocket.SendMessage(bytes);
-
+        private void SendErrorMessage(string message) => ErrorMessage?.Invoke(message);
         public void Connect(IPAddress address, int port) => clientSocket.Connect(address, port);
-        public void Connect(IPAddress address) => clientSocket.Connect(address);
-        public void Connect() => clientSocket.Connect();
 
         public void Disconnect()
         {
             clientSocket.Disconnect();
             clientSocket = null;
         }
-
-        private void SendErrorMessage(string message) => ErrorMessage?.Invoke(message);
 
         private void ProcessServerCommand(ClientSocket clientSocket, byte[] data)
         {
@@ -73,10 +69,10 @@ namespace CCGLogic.Utils.Network
         private void Signup(JsonArray arguments)
         {
             JsonArray array = [];
-            array.Add(Convert.ToInt32(SignupType.CreateNewRoom));
-            array.Add(Convert.ToInt32(GameType.Chess));
-            array.Add(1234);
-            array.Add("Plaayer");
+            array.Add(Convert.ToInt32(Config.Instance.SignupType));
+            array.Add(Convert.ToInt32(Config.Instance.GameType));
+            array.Add(Config.Instance.RoomNumber);
+            array.Add(Config.Instance.ScreenName);
 
             NotifyServer(CmdOperation.COSignup, array);
         }
