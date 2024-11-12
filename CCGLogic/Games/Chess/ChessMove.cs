@@ -70,4 +70,29 @@ namespace CCGLogic.Games.Chess
     {
         public override ChessMoveType Type => ChessMoveType.DoublePawn;
     }
+
+    public class EnPassant(ChessBoard board, GridPosition fromPos, GridPosition toPos) : NormalMove(board, fromPos, toPos)
+    {
+        public override ChessMoveType Type => ChessMoveType.EnPassant;
+
+        private readonly GridPosition capturePos = new(fromPos.Row, toPos.Column);
+
+        protected override void InitializeInfo()
+        {
+            base.InitializeInfo();
+            PieceToBeCaptured = board[capturePos];
+        }
+
+        public override void Execute()
+        {
+            base.Execute();
+            board[capturePos] = null;
+        }
+
+        public override void Cancel()
+        {
+            base.Cancel();
+            board[capturePos] = PieceToBeCaptured;
+        }
+    }
 }

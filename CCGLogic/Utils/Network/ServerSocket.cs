@@ -7,6 +7,10 @@ namespace CCGLogic.Utils.Network
     {
         public event Action<ClientSocket> NewTcpClientConnected;
 
+        public IPEndPoint IPEndPoint => tcpListener.LocalEndpoint as IPEndPoint;
+        public IPAddress Address => IPEndPoint.Address;
+        public int Port => IPEndPoint.Port;
+
         private readonly TcpListener tcpListener;
 
         public ServerSocket() => tcpListener = new(IPAddress.Any, Config.DefaultPort);
@@ -19,10 +23,7 @@ namespace CCGLogic.Utils.Network
                 new Thread(Listen) { IsBackground = true }.Start();
                 return true;
             }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            catch { return false; }
         }
 
         private void Listen()
@@ -31,6 +32,7 @@ namespace CCGLogic.Utils.Network
             {
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
                 ClientSocket connection = new(tcpClient);
+                connection.Start();
                 NewTcpClientConnected?.Invoke(connection);
             }
         }

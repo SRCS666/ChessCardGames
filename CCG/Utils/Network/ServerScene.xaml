@@ -8,5 +8,14 @@
     d:DesignHeight="900"
     d:DesignWidth="1600"
     mc:Ignorable="d">
-    <Grid />
+    <UserControl.Resources>
+        <ResourceDictionary Source="../../Resources/Styles.xaml" />
+    </UserControl.Resources>
+
+    <Grid>
+        <TextBox
+            x:Name="TextBoxServerInfo"
+            Margin="80,80,80,80"
+            Style="{StaticResource TextBoxStyle}" />
+    </Grid>
 </UserControl>

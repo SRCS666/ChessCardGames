@@ -8,8 +8,36 @@
     Title="CCG"
     Width="1600"
     Height="900"
+    MinWidth="400"
+    MinHeight="300"
     Background="#101010"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-    <Grid />
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem
+                x:Name="MenuItemGame"
+                Height="20"
+                Header="Game">
+                <MenuItem
+                    x:Name="MenuItemAddToGame"
+                    Click="MenuItemAddToGame_Click"
+                    Header="Add to game" />
+
+                <MenuItem
+                    x:Name="MenuItemStartServer"
+                    Click="MenuItemStartServer_Click"
+                    Header="Start server" />
+
+                <Separator />
+
+                <MenuItem
+                    x:Name="MenuItemExitGame"
+                    Click="MenuItemExitGame_Click"
+                    Header="Exit game" />
+            </MenuItem>
+        </Menu>
+
+        <UserControl x:Name="CCGScene" />
+    </DockPanel>
 </Window>

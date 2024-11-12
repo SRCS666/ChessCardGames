@@ -2,7 +2,7 @@
 {
     public class Config
     {
-        public static readonly Config Instance = new();
+        public static Config Instance { get; } = new();
 
         public const int DefaultPort = 9355;
     }

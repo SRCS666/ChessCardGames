@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CCG": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

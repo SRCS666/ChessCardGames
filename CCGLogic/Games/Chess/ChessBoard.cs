@@ -7,6 +7,8 @@ namespace CCGLogic.Games.Chess
         public override int RowCount => 8;
         public override int ColumnCount => 8;
 
+        private readonly ChessPiece[,] pieces = new ChessPiece[8, 8];
+
         public ChessPiece this[int row, int column]
         {
             get { return pieces[row, column]; }
@@ -18,8 +20,6 @@ namespace CCGLogic.Games.Chess
             get { return pieces[pos.Row, pos.Column]; }
             set { pieces[pos.Row, pos.Column] = value; }
         }
-
-        private readonly ChessPiece[,] pieces = new ChessPiece[8, 8];
 
         public bool IsEmpty(GridPosition pos) => this[pos] == null;
 

@@ -6,15 +6,23 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Icon.ico" />
+    <Page Remove="Resources\Styles.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Games\Chess\" />
+    <Content Include="Resources\Icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CCGLogic\CCGLogic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Styles.xaml" />
   </ItemGroup>
 
 </Project>

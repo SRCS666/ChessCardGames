@@ -2,5 +2,6 @@
 {
     public abstract class Client
     {
+        public abstract GameType GameType { get; }
     }
 }
