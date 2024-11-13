@@ -110,6 +110,7 @@ namespace CCGLogic.Utils.Network
             array.Add(Convert.ToInt32(GameConfig.Instance.GameType));
             array.Add(GameConfig.Instance.RoomNumber);
             array.Add(GameConfig.Instance.ScreenName);
+            array.Add(Engine.Version.ToJsonArray());
 
             NotifyServer(CmdOperation.COSignup, array);
         }

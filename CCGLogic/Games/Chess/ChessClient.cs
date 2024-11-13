@@ -10,6 +10,7 @@ namespace CCGLogic.Games.Chess
         public override GameType GameType => GameType.Chess;
 
         public event Action StateInitialized;
+        public event Action MoveMade;
 
         private delegate void ChessServerCommand(JsonArray arguments);
 
@@ -21,7 +22,8 @@ namespace CCGLogic.Games.Chess
         private readonly Dictionary<ChessOperation, ChessServerCommand> chessRequests = [];
         private readonly Dictionary<ChessOperation, ChessServerCommand> chessResponses = [];
 
-        public bool WillRotate => playerColorDic[ClientPlayer.Self.Name] == ChessPieceColor.Black;
+        public ChessPieceColor SelfColor => playerColorDic[ClientPlayer.Self.Name];
+        public bool WillRotate => SelfColor == ChessPieceColor.Black;
 
         public ChessClient()
         {
@@ -32,6 +34,7 @@ namespace CCGLogic.Games.Chess
         {
             chessNotifications[ChessOperation.ChessOSetPlayerColorDic] = SetPlayerColorDic;
             chessNotifications[ChessOperation.ChessOInitState] = InitState;
+            chessNotifications[ChessOperation.ChessOMove] = ProcessMove;
         }
 
         protected override void ProcessGameServerCommand(CmdType type, JsonArray arguments)
@@ -78,9 +81,7 @@ namespace CCGLogic.Games.Chess
                 JsonArray posArray = Command.StringToJsonArray(node[0].ToString());
                 JsonArray propertyArray = Command.StringToJsonArray(node[1].ToString());
 
-                int row = posArray[0].GetValue<int>();
-                int column = posArray[1].GetValue<int>();
-                GridPosition pos = new(row, column);
+                GridPosition pos = GridPosition.Parse(posArray);
 
                 ChessPieceType type = (ChessPieceType)propertyArray[0].GetValue<int>();
                 ChessPieceColor color = (ChessPieceColor)propertyArray[1].GetValue<int>();
@@ -95,6 +96,25 @@ namespace CCGLogic.Games.Chess
             State.CurrentPlayer = (ChessPieceColor)chessArguments[1].GetValue<int>();
 
             StateInitialized?.Invoke();
+        }
+
+        private void MakeMove(ChessMove move)
+        {
+            State.MakeMove(move);
+            MoveMade?.Invoke();
+        }
+
+        public void NotifyMove(ChessMove move)
+        {
+            MakeMove(move);
+            NotifyServer(CmdOperation.COGameOperation, [Convert.ToInt32(GameType),
+                Convert.ToInt32(ChessOperation.ChessOMove), move.ToJsonArray()]);
+        }
+
+        private void ProcessMove(JsonArray chessArguments)
+        {
+            ChessMove move = ChessMove.CreateMoveFromJsonArray(State.Board, chessArguments);
+            MakeMove(move);
         }
     }
 }

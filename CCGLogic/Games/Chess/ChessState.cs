@@ -33,5 +33,20 @@
                 Board[6, c] = new Pawn(Board, ChessPieceColor.White);
             }
         }
+
+        private void ChangePlayer()
+        {
+            CurrentPlayer = CurrentPlayer.Opponent();
+        }
+
+        public static IEnumerable<ChessMove> LegalMovesForPiece(ChessPiece piece) =>
+            piece.GetMoves().Where(move => move.IsLegal());
+
+        public void MakeMove(ChessMove move)
+        {
+            move.Execute();
+            Board.GetMoveHistory().Push(move);
+            ChangePlayer();
+        }
     }
 }

@@ -8,10 +8,11 @@ namespace CCGLogic.Games.Chess
     public enum ChessOperation
     {
         ChessOSetPlayerColorDic,
-        ChessOInitState
+        ChessOInitState,
+        ChessOMove
     }
 
-    public class ChessRoom(Server server, int roomNumber) : Room(server, roomNumber)
+    public class ChessRoom : Room
     {
         public override GameType GameType => GameType.Chess;
         public override int MaxPlayerCount => 2;
@@ -26,6 +27,16 @@ namespace CCGLogic.Games.Chess
         private readonly Dictionary<ChessOperation, ChessClientCommand> chessRequests = [];
         private readonly Dictionary<ChessOperation, ChessClientCommand> chessResponses = [];
 
+        public ChessRoom(Server server, int roomNumber) : base(server, roomNumber)
+        {
+            InitCallbacks();
+        }
+
+        private void InitCallbacks()
+        {
+            chessNotifications[ChessOperation.ChessOMove] = MakeMove;
+        }
+        
         protected override void Run()
         {
             AssignPlayerColor();
@@ -105,9 +116,7 @@ namespace CCGLogic.Games.Chess
                     GridPosition pos = new(r, c);
                     if (!board.IsEmpty(pos))
                     {
-                        JsonArray posArray = [];
-                        posArray.Add(pos.Row);
-                        posArray.Add(pos.Column);
+                        JsonArray posArray = pos.ToJsonArray();
 
                         ChessPiece piece = board[pos];
                         JsonArray propertyArray = [];
@@ -129,6 +138,15 @@ namespace CCGLogic.Games.Chess
 
             NotifyAllPlayers(CmdOperation.COGameOperation, [Convert.ToInt32(GameType),
                 Convert.ToInt32(ChessOperation.ChessOInitState), arguments], []);
+        }
+
+        private void MakeMove(ServerPlayer player, JsonArray chessArguments)
+        {
+            ChessMove move = ChessMove.CreateMoveFromJsonArray(state.Board, chessArguments);
+            state.MakeMove(move);
+
+            NotifyAllPlayers(CmdOperation.COGameOperation, [Convert.ToInt32(GameType),
+                Convert.ToInt32(ChessOperation.ChessOMove), move.ToJsonArray()], [player]);
         }
     }
 }

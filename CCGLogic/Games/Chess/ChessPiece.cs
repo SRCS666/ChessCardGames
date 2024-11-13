@@ -39,6 +39,18 @@ namespace CCGLogic.Games.Chess
         public bool HasMoved { get; set; }
         public GridPosition Position => board.GetPiecePos(this);
 
+        public static ChessPiece CreatePieceFromType(ChessPieceType type,
+            ChessBoard board, ChessPieceColor color) => type switch
+            {
+                ChessPieceType.King => new King(board, color),
+                ChessPieceType.Queen => new Queen(board, color),
+                ChessPieceType.Bishop => new Bishop(board, color),
+                ChessPieceType.Knight => new Knight(board, color),
+                ChessPieceType.Rook => new Rook(board, color),
+                ChessPieceType.Pawn => new Pawn(board, color),
+                _ => null
+            };
+
         public abstract IEnumerable<ChessMove> GetMoves();
 
         protected bool CanMoveTo(GridPosition pos) => board.IsInside(pos) && board.IsEmpty(pos);
@@ -66,17 +78,11 @@ namespace CCGLogic.Games.Chess
         protected IEnumerable<GridPosition> MultiStepMovePositionsInDirs(IEnumerable<GridDirection> dirs) =>
             dirs.SelectMany(MultiStepMovePositionsInDir);
 
-        public static ChessPiece CreatePieceFromType(ChessPieceType type,
-            ChessBoard board, ChessPieceColor color) => type switch
+        public bool CanCaptureOpponentKing() => GetMoves().Any(move =>
         {
-            ChessPieceType.King => new King(board, color),
-            ChessPieceType.Queen => new Queen(board, color),
-            ChessPieceType.Bishop => new Bishop(board, color),
-            ChessPieceType.Knight => new Knight(board, color),
-            ChessPieceType.Rook => new Rook(board, color),
-            ChessPieceType.Pawn => new Pawn(board, color),
-            _ => null
-        };
+            ChessPiece piece = move.PieceToBeCaptured;
+            return piece != null && piece.Type == ChessPieceType.King;
+        });
     }
 
     public abstract class MultiStepPiece(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)
@@ -91,10 +97,22 @@ namespace CCGLogic.Games.Chess
     {
         public override ChessPieceType Type => ChessPieceType.King;
 
-        public override IEnumerable<ChessMove> GetMoves()
+        private IEnumerable<GridPosition> MovePositionsForKing()
         {
-            return [];
+            foreach (GridDirection dir in GridDirection.EightDirections)
+            {
+                GridPosition to = Position + dir;
+                if (CanMoveToOrCaptureAt(to))
+                {
+                    yield return to;
+                }
+            }
         }
+
+        private IEnumerable<ChessMove> NormalMoves() =>
+            MovePositionsForKing().Select(to => new NormalMove(board, Position, to));
+
+        public override IEnumerable<ChessMove> GetMoves() => NormalMoves();
     }
 
     public class Queen(ChessBoard board, ChessPieceColor color) : MultiStepPiece(board, color)
@@ -142,9 +160,68 @@ namespace CCGLogic.Games.Chess
     {
         public override ChessPieceType Type => ChessPieceType.Pawn;
 
-        public override IEnumerable<ChessMove> GetMoves()
+        private readonly ChessPieceType[] promotionTypes =
+        [
+            ChessPieceType.Queen,
+            ChessPieceType.Bishop,
+            ChessPieceType.Knight,
+            ChessPieceType.Rook,
+        ];
+
+        private readonly GridDirection forward = color == ChessPieceColor.White ? GridDirection.North : GridDirection.South;
+
+        private IEnumerable<ChessMove> PromotionMoves(GridPosition to) =>
+            promotionTypes.Select(type => new PawnPromotion(board, Position, to, type));
+
+        private IEnumerable<ChessMove> ForwardMoves()
         {
-            return [];
+            GridPosition oneMovePos = Position + forward;
+            if (CanMoveTo(oneMovePos))
+            {
+                if (oneMovePos.Row == 0 || oneMovePos.Row == 7)
+                {
+                    foreach (ChessMove move in PromotionMoves(oneMovePos))
+                    {
+                        yield return move;
+                    }
+                }
+                else
+                {
+                    yield return new NormalMove(board, Position, oneMovePos);
+                }
+
+                GridPosition twoMovePos = oneMovePos + forward;
+                if (!HasMoved && CanMoveTo(twoMovePos))
+                {
+                    yield return new DoublePawn(board, Position, twoMovePos);
+                }
+            }
         }
+
+        private IEnumerable<ChessMove> DiagonalMoves()
+        {
+            foreach (GridDirection dir in GridDirection.EastAndWest)
+            {
+                GridPosition to = Position + forward + dir;
+
+                if (CanCaptureAt(to))
+                {
+                    if (to.Row == 0 || to.Row == 7)
+                    {
+                        foreach (ChessMove move in PromotionMoves(to))
+                        {
+                            yield return move;
+                        }
+                    }
+                    else
+                    {
+                        yield return new NormalMove(board, Position, to);
+                    }
+                }
+            }
+        }
+
+        public override IEnumerable<ChessMove> GetMoves() =>
+            ForwardMoves().Concat(DiagonalMoves());
     }
 }

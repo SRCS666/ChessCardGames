@@ -13,6 +13,7 @@
             x:Name="BoardGrid"
             Width="1024"
             Height="1024"
+            MouseLeftButtonDown="BoardGrid_MouseLeftButtonDown"
             RenderOptions.BitmapScalingMode="HighQuality">
 
             <UniformGrid

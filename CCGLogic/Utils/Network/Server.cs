@@ -67,6 +67,12 @@ namespace CCGLogic.Utils.Network
             GameType gameType = (GameType)arguments[1].GetValue<int>();
             int roomNumber = arguments[2].GetValue<int>();
             string screenName = arguments[3].GetValue<string>();
+            
+            Version version = Version.Parse(Command.StringToJsonArray(arguments[4].ToString()));
+            if (version != Engine.Version)
+            {
+                NotifySignupResult(clientSocket, SignupResultType.Failed, "Your version is not the same as server.");
+            }
 
             Room roomFound = AllRoomsForGame(gameType).FirstOrDefault(room => room.RoomNumber == roomNumber);
             if (signupType == SignupType.CreateNewRoom)

@@ -1,9 +1,21 @@
-﻿namespace CCGLogic.Utils.ChessGame.GridBoardGame
+﻿using System.Text.Json.Nodes;
+
+namespace CCGLogic.Utils.ChessGame.GridBoardGame
 {
     public class GridPosition(int row, int column)
     {
         public int Row { get; } = row;
         public int Column { get; } = column;
+
+        public JsonArray ToJsonArray() => [Row, Column];
+
+        public static GridPosition Parse(JsonArray array)
+        {
+            int row = array[0].GetValue<int>();
+            int column = array[1].GetValue<int>();
+
+            return new(row, column);
+        }
 
         public override bool Equals(object obj) => obj is GridPosition position &&
             Row == position.Row && Column == position.Column;
