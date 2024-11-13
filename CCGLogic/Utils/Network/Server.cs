@@ -32,12 +32,6 @@ namespace CCGLogic.Utils.Network
 
         public bool Start() => serverSocket.Start();
 
-        private void ProcessNewConnection(ClientSocket clientSocket)
-        {
-            clientSocket.MessageGot += ProcessSignupRequest;
-            NotifyClient(clientSocket, CmdOperation.COSignup, []);
-        }
-
         private static void NotifyClient(ClientSocket clientSocket, CmdOperation operation, JsonArray arguments)
         {
             Command command = new(CmdWhere.CWRoom, CmdWhere.CWClient,
@@ -45,41 +39,28 @@ namespace CCGLogic.Utils.Network
             clientSocket.SendMessage(command.ToBytes());
         }
 
-        private Room CreateNewRoom(GameType gameType, int roomNumber)
+        private void ProcessNewConnection(ClientSocket clientSocket)
         {
-            Room room = gameType switch
-            {
-                GameType.Chess => new ChessRoom(this, roomNumber),
-                GameType.Xiangqi => new XiangqiRoom(this, roomNumber),
-                _ => null
-            };
-            room.ServerMessage += RoomServerMessage;
-            rooms.Add(room);
-
-            return room;
+            clientSocket.MessageGot += ProcessSignupRequest;
+            NotifyClient(clientSocket, CmdOperation.COSignup, []);
         }
-
-        private IEnumerable<Room> AllRoomsForGame(GameType gameType) =>
-            rooms.Where(room => room.GameType == gameType);
-        private void RoomServerMessage(string message) => ServerMessage?.Invoke(message);
 
         private void ProcessSignupRequest(ClientSocket clientSocket, byte[] request)
         {
             Command command = Command.Parse(request);
 
-            if (command.Source != CmdWhere.CWClient)
+            if (command.Source != CmdWhere.CWClient || command.Destination != CmdWhere.CWRoom)
             {
-                ServerMessage?.Invoke(string.Format("Invalid message from unknown source"));
+                ServerMessage?.Invoke(string.Format("Invalid message from unknown source."));
+                return;
+            }
+            if (command.Operation != CmdOperation.COSignup)
+            {
+                ServerMessage?.Invoke(string.Format("Invalid sign up."));
                 return;
             }
 
             clientSocket.MessageGot -= ProcessSignupRequest;
-
-            if (command.Operation != CmdOperation.COSignup)
-            {
-                clientSocket.Disconnect();
-                return;
-            }
 
             JsonArray arguments = command.Arguments;
             SignupType signupType = (SignupType)arguments[0].GetValue<int>();
@@ -95,7 +76,7 @@ namespace CCGLogic.Utils.Network
                     Room room = CreateNewRoom(gameType, roomNumber);
 
                     room.SignupNewPlayer(clientSocket, screenName);
-                    NotifySignupResult(clientSocket, SignupResultType.Successed);
+                    NotifySignupResult(clientSocket, SignupResultType.Successed, "Succeed.");
                 }
                 else
                 {
@@ -113,7 +94,7 @@ namespace CCGLogic.Utils.Network
                     else
                     {
                         roomFound.SignupNewPlayer(clientSocket, screenName);
-                        NotifySignupResult(clientSocket, SignupResultType.Successed);
+                        NotifySignupResult(clientSocket, SignupResultType.Successed, "Succeed.");
                     }
                 }
                 else
@@ -123,13 +104,31 @@ namespace CCGLogic.Utils.Network
             }
         }
 
-        private static void NotifySignupResult(ClientSocket clientSocket, SignupResultType type, string reason = null)
+        private static void NotifySignupResult(ClientSocket clientSocket, SignupResultType type, string reason)
         {
             JsonArray jsonArray = [];
             jsonArray.Add(type);
             jsonArray.Add(reason);
 
             NotifyClient(clientSocket, CmdOperation.COSignupResult, jsonArray);
+        }
+
+        private IEnumerable<Room> AllRoomsForGame(GameType gameType) =>
+            rooms.Where(room => room.GameType == gameType);
+        private void RoomServerMessage(string message) => ServerMessage?.Invoke(message);
+
+        private Room CreateNewRoom(GameType gameType, int roomNumber)
+        {
+            Room room = gameType switch
+            {
+                GameType.Chess => new ChessRoom(this, roomNumber),
+                GameType.Xiangqi => new XiangqiRoom(this, roomNumber),
+                _ => null
+            };
+            room.ServerMessage += RoomServerMessage;
+            rooms.Add(room);
+
+            return room;
         }
     }
 }

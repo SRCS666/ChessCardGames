@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Nodes;
 
 namespace CCGLogic.Utils.Network
 {
@@ -32,14 +33,35 @@ namespace CCGLogic.Utils.Network
         }
 
         private void OnDisconnected(IPEndPoint endPoint) => Disconnected?.Invoke(endPoint);
-        private void SendMessage(byte[] message) => clientSocket?.SendMessage(message);
+        public void SendMessage(byte[] message) => clientSocket?.SendMessage(message);
 
         private void OnMessageGot(ClientSocket clientSocket, byte[] message)
         {
             Command command = Command.Parse(message);
-            if (command.Destination == CmdWhere.CWRoom)
+            if (command.Source == CmdWhere.CWClient && command.Destination == CmdWhere.CWRoom)
             {
                 ClientCommandReceived?.Invoke(this, command);
+            }
+        }
+
+        public void Notify(CmdOperation operation, JsonArray arguments)
+        {
+            Command command = new(CmdWhere.CWRoom, CmdWhere.CWClient,
+                CmdType.CTNotification, operation, arguments);
+            SendMessage(command.ToBytes());
+        }
+
+        public void IntroduceTo(ServerPlayer player = null)
+        {
+            JsonArray array = [Name, ScreenName];
+
+            if (player == null)
+            {
+                Room.BroadcastNotify(CmdOperation.COAddPlayer, array, [this]);
+            }
+            else
+            {
+                player.Notify(CmdOperation.COAddPlayer, array);
             }
         }
     }

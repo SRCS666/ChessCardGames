@@ -41,18 +41,19 @@ namespace CCG.Utils
             client.Connect(Config.Instance.AddToGameIP, Config.Instance.AddToGamePort);
         }
 
-        private void SignupResult(Client client, JsonArray arguments)
+        private void SignupResult(Client client, SignupResultType result, string reason)
         {
-            SignupResultType result = (SignupResultType)arguments[0].GetValue<int>();
-
             if (result == SignupResultType.Successed)
             {
                 ChangeToGameScene();
             }
             else
             {
-                string reason = arguments[1].GetValue<string>();
-                MessageBox.Show(this, reason, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(this, reason, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
+                client.Disconnect();
             }
         }
 

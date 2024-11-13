@@ -34,7 +34,7 @@ namespace CCGLogic.Utils.Network
                     byte[] result = new byte[bytesRead];
                     Array.Copy(buffer, result, bytesRead);
 
-                    foreach (byte[] message in SplitMessage(result))
+                    foreach (byte[] message in Engine.SplitMessage(result))
                     {
                         MessageGot?.Invoke(this, message);
                     }
@@ -78,36 +78,6 @@ namespace CCGLogic.Utils.Network
         {
             NetworkStream stream = tcpClient.GetStream();
             stream.Write(message, 0, message.Length);
-        }
-
-        private static IEnumerable<byte[]> SplitMessage(byte[] message)
-        {
-            int index1 = 0;
-            int index2 = 1;
-            int count = 1;
-            bool inDQ = false;
-
-            while (index1 < message.Length)
-            {
-                while (!(message[index2] == ']' && count == 1))
-                {
-                    if (!inDQ)
-                    {
-                        if (message[index2] == ']') { count--; }
-                        if (message[index2] == '[') { count++; }
-                    }
-                    if (message[index2] == '\"') { inDQ = !inDQ; }
-                    index2++;
-                }
-
-                int length = index2 - index1 + 1;
-                byte[] result = new byte[length];
-                Array.Copy(message, index1, result, 0, length);
-                yield return result;
-
-                index1 = index2 + 1;
-                index2 = index1 + 1;
-            }
         }
     }
 }

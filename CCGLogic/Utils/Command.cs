@@ -7,7 +7,7 @@ namespace CCGLogic.Utils
     public enum CmdType
     {
         CTRequest,
-        CTReply,
+        CTResponse,
         CTNotification
     }
 
@@ -20,7 +20,11 @@ namespace CCGLogic.Utils
     public enum CmdOperation
     {
         COSignup,
-        COSignupResult
+        COSignupResult,
+        COSetProperty,
+        COAddPlayer,
+        COToggleReady,
+        COGameOperation
     }
 
     public class Command(CmdWhere source, CmdWhere destination, CmdType type,

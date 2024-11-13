@@ -21,8 +21,6 @@ namespace CCGLogic.Games.Chess
             set { pieces[pos.Row, pos.Column] = value; }
         }
 
-        public bool IsEmpty(GridPosition pos) => this[pos] == null;
-
         public GridPosition GetPiecePos(ChessPiece piece)
         {
             for (int r = 0; r < 8; r++)
@@ -37,5 +35,7 @@ namespace CCGLogic.Games.Chess
             }
             return null;
         }
+
+        public bool IsEmpty(GridPosition pos) => this[pos] == null;
     }
 }
