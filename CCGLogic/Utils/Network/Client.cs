@@ -32,7 +32,7 @@ namespace CCGLogic.Utils.Network
 
             ClientPlayer.Self = new(this)
             {
-                ScreenName = Config.Instance.ScreenName
+                ScreenName = GameConfig.Instance.ScreenName
             };
             players.Add(ClientPlayer.Self);
 
@@ -106,10 +106,10 @@ namespace CCGLogic.Utils.Network
         private void Signup(JsonArray arguments)
         {
             JsonArray array = [];
-            array.Add(Convert.ToInt32(Config.Instance.SignupType));
-            array.Add(Convert.ToInt32(Config.Instance.GameType));
-            array.Add(Config.Instance.RoomNumber);
-            array.Add(Config.Instance.ScreenName);
+            array.Add(Convert.ToInt32(GameConfig.Instance.SignupType));
+            array.Add(Convert.ToInt32(GameConfig.Instance.GameType));
+            array.Add(GameConfig.Instance.RoomNumber);
+            array.Add(GameConfig.Instance.ScreenName);
 
             NotifyServer(CmdOperation.COSignup, array);
         }

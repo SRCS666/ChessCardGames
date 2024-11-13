@@ -3,13 +3,9 @@
     public class ChessState
     {
         public ChessBoard Board { get; }
-        public ChessPieceColor CurrentPlayer { get; private set; }
+        public ChessPieceColor CurrentPlayer { get; set; }
 
-        public ChessState()
-        {
-            Board = new();
-            CurrentPlayer = ChessPieceColor.White;
-        }
+        public ChessState() => Board = new();
 
         public void AddStartPieces()
         {

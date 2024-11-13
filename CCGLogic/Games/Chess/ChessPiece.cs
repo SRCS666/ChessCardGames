@@ -65,6 +65,18 @@ namespace CCGLogic.Games.Chess
 
         protected IEnumerable<GridPosition> MultiStepMovePositionsInDirs(IEnumerable<GridDirection> dirs) =>
             dirs.SelectMany(MultiStepMovePositionsInDir);
+
+        public static ChessPiece CreatePieceFromType(ChessPieceType type,
+            ChessBoard board, ChessPieceColor color) => type switch
+        {
+            ChessPieceType.King => new King(board, color),
+            ChessPieceType.Queen => new Queen(board, color),
+            ChessPieceType.Bishop => new Bishop(board, color),
+            ChessPieceType.Knight => new Knight(board, color),
+            ChessPieceType.Rook => new Rook(board, color),
+            ChessPieceType.Pawn => new Pawn(board, color),
+            _ => null
+        };
     }
 
     public abstract class MultiStepPiece(ChessBoard board, ChessPieceColor color) : ChessPiece(board, color)

@@ -9,6 +9,21 @@
     d:DesignWidth="1600"
     mc:Ignorable="d">
     <Viewbox>
-        <local:ChessBoardControl />
+        <Grid
+            x:Name="BoardGrid"
+            Width="1024"
+            Height="1024"
+            RenderOptions.BitmapScalingMode="HighQuality">
+
+            <UniformGrid
+                x:Name="HighlightGrid"
+                Columns="8"
+                Rows="8" />
+
+            <UniformGrid
+                x:Name="PieceGrid"
+                Columns="8"
+                Rows="8" />
+        </Grid>
     </Viewbox>
 </UserControl>

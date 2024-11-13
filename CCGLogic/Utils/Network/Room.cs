@@ -74,7 +74,7 @@ namespace CCGLogic.Utils.Network
 
         private static void Notify(ServerPlayer player, CmdOperation operation, JsonArray arguments) => player.Notify(operation, arguments);
 
-        public void BroadcastNotify(CmdOperation operation,
+        public void NotifyAllPlayers(CmdOperation operation,
             JsonArray arguments, IEnumerable<ServerPlayer> excepts)
         {
             foreach (ServerPlayer player in players)

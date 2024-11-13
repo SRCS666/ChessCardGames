@@ -9,7 +9,7 @@ namespace CCG.Utils.Network
         {
             InitializeComponent();
 
-            TextBoxPort.Text = Config.Instance.StartServerPort.ToString();
+            TextBoxPort.Text = GameConfig.Instance.StartServerPort.ToString();
         }
 
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
@@ -17,7 +17,7 @@ namespace CCG.Utils.Network
             int port;
             if (TextBoxPort.Text == string.Empty)
             {
-                port = Config.DefaultPort;
+                port = GameConfig.DefaultPort;
             }
             else
             {
@@ -30,7 +30,7 @@ namespace CCG.Utils.Network
                 }
             }
 
-            Config.Instance.StartServerPort = port;
+            GameConfig.Instance.StartServerPort = port;
 
             DialogResult = true;
         }

@@ -6,13 +6,12 @@
     xmlns:local="clr-namespace:CCG.Utils"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="CCG"
-    Width="800"
-    Height="600"
+    Width="1600"
+    Height="900"
     MinWidth="400"
     MinHeight="300"
     Background="#101010"
     Closing="Window_Closing"
-    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <DockPanel>
         <Menu DockPanel.Dock="Top">

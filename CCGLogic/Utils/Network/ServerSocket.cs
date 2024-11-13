@@ -13,7 +13,7 @@ namespace CCGLogic.Utils.Network
 
         private readonly TcpListener tcpListener;
 
-        public ServerSocket() => tcpListener = new(IPAddress.Any, Config.Instance.StartServerPort);
+        public ServerSocket() => tcpListener = new(IPAddress.Any, GameConfig.Instance.StartServerPort);
 
         public bool Start()
         {

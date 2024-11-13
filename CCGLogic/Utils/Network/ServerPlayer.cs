@@ -57,7 +57,7 @@ namespace CCGLogic.Utils.Network
 
             if (player == null)
             {
-                Room.BroadcastNotify(CmdOperation.COAddPlayer, array, [this]);
+                Room.NotifyAllPlayers(CmdOperation.COAddPlayer, array, [this]);
             }
             else
             {

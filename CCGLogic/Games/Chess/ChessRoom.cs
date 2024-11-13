@@ -1,4 +1,5 @@
 ﻿using CCGLogic.Utils;
+using CCGLogic.Utils.ChessGame.GridBoardGame;
 using CCGLogic.Utils.Network;
 using System.Text.Json.Nodes;
 
@@ -7,7 +8,7 @@ namespace CCGLogic.Games.Chess
     public enum ChessOperation
     {
         ChessOSetPlayerColorDic,
-        ChessOSetState
+        ChessOInitState
     }
 
     public class ChessRoom(Server server, int roomNumber) : Room(server, roomNumber)
@@ -33,8 +34,8 @@ namespace CCGLogic.Games.Chess
 
         protected override void ProcessGameClientCommand(ServerPlayer player, CmdType type, JsonArray arguments)
         {
-            ChessOperation operation = (ChessOperation)arguments[0].GetValue<int>();
-            JsonArray chessArguments = Command.StringToJsonArray(arguments[1].ToString());
+            ChessOperation operation = (ChessOperation)arguments[1].GetValue<int>();
+            JsonArray chessArguments = Command.StringToJsonArray(arguments[2].ToString());
 
             switch (type)
             {
@@ -69,8 +70,9 @@ namespace CCGLogic.Games.Chess
         {
             state = new();
             state.AddStartPieces();
+            state.CurrentPlayer = ChessPieceColor.White;
 
-            NotifyState();
+            NotifyInitState();
         }
 
         private void NotifyPlayerColorDic()
@@ -86,13 +88,47 @@ namespace CCGLogic.Games.Chess
                 pairs.Add(pair);
             }
 
-            BroadcastNotify(CmdOperation.COGameOperation,
-                [Convert.ToInt32(ChessOperation.ChessOSetPlayerColorDic), pairs], []);
+            NotifyAllPlayers(CmdOperation.COGameOperation, [Convert.ToInt32(GameType),
+                Convert.ToInt32(ChessOperation.ChessOSetPlayerColorDic), pairs], []);
         }
 
-        private void NotifyState()
+        private void NotifyInitState()
         {
+            JsonArray arguments = [];
+            ChessBoard board = state.Board;
 
+            JsonArray piecesArray = [];
+            for (int r = 0; r < 8; r++)
+            {
+                for (int c = 0; c < 8; c++)
+                {
+                    GridPosition pos = new(r, c);
+                    if (!board.IsEmpty(pos))
+                    {
+                        JsonArray posArray = [];
+                        posArray.Add(pos.Row);
+                        posArray.Add(pos.Column);
+
+                        ChessPiece piece = board[pos];
+                        JsonArray propertyArray = [];
+                        propertyArray.Add(Convert.ToInt32(piece.Type));
+                        propertyArray.Add(Convert.ToInt32(piece.Color));
+                        propertyArray.Add(piece.HasMoved);
+
+                        JsonArray pieceArray = [];
+                        pieceArray.Add(posArray);
+                        pieceArray.Add(propertyArray);
+
+                        piecesArray.Add(pieceArray);
+                    }
+                }
+            }
+
+            arguments.Add(piecesArray);
+            arguments.Add(Convert.ToInt32(state.CurrentPlayer));
+
+            NotifyAllPlayers(CmdOperation.COGameOperation, [Convert.ToInt32(GameType),
+                Convert.ToInt32(ChessOperation.ChessOInitState), arguments], []);
         }
     }
 }

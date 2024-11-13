@@ -9,7 +9,8 @@ namespace CCG
         [STAThread]
         public static void Main(string[] args)
         {
-            Config.Instance.LoadConfig();
+            GameConfig.Instance.LoadConfig();
+            UIConfig.Instance.LoadConfig();
 
             Application application = new();
             MainWindow mainWindow = new();

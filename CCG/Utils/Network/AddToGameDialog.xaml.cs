@@ -7,9 +7,9 @@ namespace CCG.Utils.Network
 {
     public partial class AddToGameDialog : Window
     {
-        private List<string> signupTypeOptions = [];
-        private Dictionary<SignupType, string> signupTypeDic = [];
-        private List<GameType> gameTypeOptions = [];
+        private readonly List<string> signupTypeOptions = [];
+        private readonly Dictionary<SignupType, string> signupTypeDic = [];
+        private readonly List<GameType> gameTypeOptions = [];
 
         public AddToGameDialog()
         {
@@ -27,13 +27,13 @@ namespace CCG.Utils.Network
             }
             ComboBoxGameType.ItemsSource = gameTypeOptions;
 
-            ComboBoxSignupType.SelectedIndex = signupTypeOptions.IndexOf(signupTypeDic[Config.Instance.SignupType]);
-            ComboBoxGameType.SelectedIndex = gameTypeOptions.IndexOf(Config.Instance.GameType);
+            ComboBoxSignupType.SelectedIndex = signupTypeOptions.IndexOf(signupTypeDic[GameConfig.Instance.SignupType]);
+            ComboBoxGameType.SelectedIndex = gameTypeOptions.IndexOf(GameConfig.Instance.GameType);
 
-            TextBoxIP.Text = Config.Instance.AddToGameIP.ToString();
-            TextBoxPort.Text = Config.Instance.AddToGamePort.ToString();
-            TextBoxRoomNumber.Text = Config.Instance.RoomNumber.ToString();
-            TextBoxUsername.Text = Config.Instance.ScreenName;
+            TextBoxIP.Text = GameConfig.Instance.AddToGameIP.ToString();
+            TextBoxPort.Text = GameConfig.Instance.AddToGamePort.ToString();
+            TextBoxRoomNumber.Text = GameConfig.Instance.RoomNumber.ToString();
+            TextBoxUsername.Text = GameConfig.Instance.ScreenName;
         }
 
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
@@ -57,7 +57,7 @@ namespace CCG.Utils.Network
             int port;
             if (TextBoxIP.Text == string.Empty)
             {
-                port = Config.DefaultPort;
+                port = GameConfig.DefaultPort;
             }
             else
             {
@@ -73,7 +73,7 @@ namespace CCG.Utils.Network
             int roomNumber;
             if (TextBoxRoomNumber.Text == string.Empty)
             {
-                roomNumber = Config.DefaultRoomNumber;
+                roomNumber = GameConfig.DefaultRoomNumber;
             }
             else
             {
@@ -93,13 +93,13 @@ namespace CCG.Utils.Network
                 return;
             }
 
-            Config.Instance.AddToGameIP = ip;
-            Config.Instance.AddToGamePort = port;
-            Config.Instance.RoomNumber = roomNumber;
-            Config.Instance.ScreenName = TextBoxUsername.Text;
+            GameConfig.Instance.AddToGameIP = ip;
+            GameConfig.Instance.AddToGamePort = port;
+            GameConfig.Instance.RoomNumber = roomNumber;
+            GameConfig.Instance.ScreenName = TextBoxUsername.Text;
 
-            Config.Instance.SignupType = signupTypeDic.Keys.FirstOrDefault(key => signupTypeDic[key] == ComboBoxSignupType.SelectedItem.ToString());
-            Config.Instance.GameType = gameTypeOptions[ComboBoxGameType.SelectedIndex];
+            GameConfig.Instance.SignupType = signupTypeDic.Keys.FirstOrDefault(key => signupTypeDic[key] == ComboBoxSignupType.SelectedItem.ToString());
+            GameConfig.Instance.GameType = gameTypeOptions[ComboBoxGameType.SelectedIndex];
 
             DialogResult = true;
         }

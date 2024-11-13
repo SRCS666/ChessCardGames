@@ -18,6 +18,12 @@ namespace CCG.Utils
         {
             InitializeComponent();
 
+            Left = UIConfig.Instance.MWPositionX;
+            Top = UIConfig.Instance.MWPositionY;
+            Width = UIConfig.Instance.MWWidth;
+            Height = UIConfig.Instance.MWHeight;
+            WindowState = UIConfig.Instance.MWState;
+
             CCGScene.Content = new MainMenuScene(this);
         }
 
@@ -37,7 +43,7 @@ namespace CCG.Utils
             client.Signedup += SignupResult;
             client.ErrorMessage += NetworkError;
 
-            client.Connect(Config.Instance.AddToGameIP, Config.Instance.AddToGamePort);
+            client.Connect(GameConfig.Instance.AddToGameIP, GameConfig.Instance.AddToGamePort);
         }
 
         private void SignupResult(Client client, SignupResultType result, string reason)
@@ -82,7 +88,18 @@ namespace CCG.Utils
         }
 
         public void ExitGame() => Close();
-        private void Window_Closing(object sender, CancelEventArgs e) => Config.Instance.SaveConfig();
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            UIConfig.Instance.MWPositionX = Left;
+            UIConfig.Instance.MWPositionY = Top;
+            UIConfig.Instance.MWWidth = Width;
+            UIConfig.Instance.MWHeight = Height;
+            UIConfig.Instance.MWState = WindowState;
+
+            GameConfig.Instance.SaveConfig();
+            UIConfig.Instance.SaveConfig();
+        }
 
         private void ChangeToServerScene()
         {
@@ -99,7 +116,7 @@ namespace CCG.Utils
                 MenuItemAddToGame.IsEnabled = false;
                 MenuItemStartServer.IsEnabled = false;
 
-                UserControl control = Config.Instance.GameType switch
+                UserControl control = GameConfig.Instance.GameType switch
                 {
                     GameType.Chess => new ChessScene(this, client as ChessClient),
                     _ => null
