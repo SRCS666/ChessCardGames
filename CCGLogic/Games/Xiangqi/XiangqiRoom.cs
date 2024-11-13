@@ -1,5 +1,6 @@
 ﻿using CCGLogic.Utils;
 using CCGLogic.Utils.Network;
+using System.Text.Json.Nodes;
 
 namespace CCGLogic.Games.Xiangqi
 {
@@ -13,17 +14,7 @@ namespace CCGLogic.Games.Xiangqi
 
         }
 
-        protected override void ProcessGameClientNotification(ServerPlayer player, Command command)
-        {
-
-        }
-
-        protected override void ProcessGameClientRequest(ServerPlayer player, Command command)
-        {
-
-        }
-
-        protected override void ProcessGameClientResponse(ServerPlayer player, Command command)
+        protected override void ProcessGameClientCommand(ServerPlayer player, CmdType type, JsonArray arguments)
         {
 
         }

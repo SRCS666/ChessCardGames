@@ -22,7 +22,7 @@ namespace CCGLogic.Utils.Network
         private readonly Dictionary<CmdOperation, ClientCommand> requests = [];
         private readonly Dictionary<CmdOperation, ClientCommand> responses = [];
 
-        private readonly List<ServerPlayer> players = [];
+        protected readonly List<ServerPlayer> players = [];
 
         public Room(Server server, int roomNumber)
         {
@@ -48,42 +48,29 @@ namespace CCGLogic.Utils.Network
                 {
                     return;
                 }
-
-                if (command.Type == CmdType.CTNotification)
-                {
-                    ProcessGameClientNotification(player, command);
-                }
-                else if (command.Type == CmdType.CTRequest)
-                {
-                    ProcessGameClientRequest(player, command);
-                }
-                else
-                {
-                    ProcessGameClientResponse(player, command);
-                }
+                ProcessGameClientCommand(player, command.Type, command.Arguments);
             }
             else
             {
-                if (command.Type == CmdType.CTNotification)
+                switch (command.Type)
                 {
-                    notifications[command.Operation](player, command.Arguments);
-                }
-                else if (command.Type == CmdType.CTRequest)
-                {
-                    requests[command.Operation](player, command.Arguments);
-                }
-                else
-                {
-                    responses[command.Operation](player, command.Arguments);
+                    case CmdType.CTNotification:
+                        notifications[command.Operation](player, command.Arguments);
+                        break;
+                    case CmdType.CTRequest:
+                        requests[command.Operation](player, command.Arguments);
+                        break;
+                    case CmdType.CTResponse:
+                        responses[command.Operation](player, command.Arguments);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
 
         protected abstract void Run();
-
-        protected abstract void ProcessGameClientNotification(ServerPlayer player, Command command);
-        protected abstract void ProcessGameClientRequest(ServerPlayer player, Command command);
-        protected abstract void ProcessGameClientResponse(ServerPlayer player, Command command);
+        protected abstract void ProcessGameClientCommand(ServerPlayer player, CmdType type, JsonArray arguments);
 
         private static void Notify(ServerPlayer player, CmdOperation operation, JsonArray arguments) => player.Notify(operation, arguments);
 
@@ -110,7 +97,6 @@ namespace CCGLogic.Utils.Network
             Notify(playerToNotify, CmdOperation.COSetProperty, arguments);
         }
 
-        public IEnumerable<ServerPlayer> GetPlayers() => players;
         public bool IsFull() => players.Count == MaxPlayerCount;
 
         private string GeneratePlayerName() => string.Format("{0}{1}", GameType, ++playerID);

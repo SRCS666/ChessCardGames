@@ -1,4 +1,6 @@
-﻿namespace CCGLogic.Utils
+﻿using System.Reflection;
+
+namespace CCGLogic.Utils
 {
     public enum GameType
     {
@@ -44,6 +46,43 @@
                 index1 = index2 + 1;
                 index2 = index1 + 1;
             }
+        }
+
+        public static void SetPropertyValue(object obj, string key, string value)
+        {
+            PropertyInfo propertyInfo = obj.GetType().GetProperty(key);
+
+            if (propertyInfo.PropertyType == typeof(int))
+            {
+                propertyInfo.SetValue(obj, int.Parse(value));
+            }
+            else if (propertyInfo.PropertyType == typeof(bool))
+            {
+                propertyInfo.SetValue(obj, bool.Parse(value));
+            }
+            else if (propertyInfo.PropertyType.IsEnum)
+            {
+                propertyInfo.SetValue(obj, Enum.Parse(propertyInfo.PropertyType, value));
+            }
+            else
+            {
+                propertyInfo.SetValue(obj, value);
+            }
+        }
+
+        public IEnumerable<T> Shuffle<T>(IEnumerable<T> list)
+        {
+            List<T> list1 = list.ToList();
+            List<T> list2 = [];
+
+            while (list1.Count > 0)
+            {
+                int index = Random.Next(0, list1.Count);
+                list2.Add(list1[index]);
+                list1.RemoveAt(index);
+            }
+
+            return list2;
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using System.Numerics;
-using System.Reflection;
 using System.Text.Json.Nodes;
 
 namespace CCGLogic.Utils.Network
@@ -74,41 +72,29 @@ namespace CCGLogic.Utils.Network
                     {
                         return;
                     }
-
-                    if (command.Type == CmdType.CTNotification)
-                    {
-                        ProcessGameServerNotification(command.Arguments);
-                    }
-                    else if (command.Type == CmdType.CTRequest)
-                    {
-                        ProcessGameServerRequest(command.Arguments);
-                    }
-                    else
-                    {
-                        ProcessGameServerResponse(command.Arguments);
-                    }
+                    ProcessGameServerCommand(command.Type, command.Arguments);
                 }
                 else
                 {
-                    if (command.Type == CmdType.CTNotification)
+                    switch (command.Type)
                     {
-                        notifications[command.Operation](command.Arguments);
-                    }
-                    else if (command.Type == CmdType.CTRequest)
-                    {
-                        requests[command.Operation](command.Arguments);
-                    }
-                    else
-                    {
-                        responses[command.Operation](command.Arguments);
+                        case CmdType.CTNotification:
+                            notifications[command.Operation](command.Arguments);
+                            break;
+                        case CmdType.CTRequest:
+                            requests[command.Operation](command.Arguments);
+                            break;
+                        case CmdType.CTResponse:
+                            responses[command.Operation](command.Arguments);
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
         }
 
-        protected abstract void ProcessGameServerNotification(JsonArray arguments);
-        protected abstract void ProcessGameServerRequest(JsonArray arguments);
-        protected abstract void ProcessGameServerResponse(JsonArray arguments);
+        protected abstract void ProcessGameServerCommand(CmdType type, JsonArray arguments);
 
         public void NotifyServer(CmdOperation operation, JsonArray arguments)
         {
@@ -149,7 +135,7 @@ namespace CCGLogic.Utils.Network
             {
                 string key = arguments[1].GetValue<string>();
                 string value = arguments[2].GetValue<string>();
-                SetPropertyValue(player, key, value);
+                Engine.SetPropertyValue(player, key, value);
             }
         }
 
@@ -170,28 +156,6 @@ namespace CCGLogic.Utils.Network
         {
             if (name == Engine.SelfReferenceName(GameType)) { return ClientPlayer.Self; }
             return players.FirstOrDefault(player => player.Name == name);
-        }
-
-        private static void SetPropertyValue(object obj, string key, string value)
-        {
-            PropertyInfo propertyInfo = obj.GetType().GetProperty(key);
-
-            if (propertyInfo.PropertyType == typeof(int))
-            {
-                propertyInfo.SetValue(obj, int.Parse(value));
-            }
-            else if (propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(obj, bool.Parse(value));
-            }
-            else if (propertyInfo.PropertyType.IsEnum)
-            {
-                propertyInfo.SetValue(obj, Enum.Parse(propertyInfo.PropertyType, value));
-            }
-            else
-            {
-                propertyInfo.SetValue(obj, value);
-            }
         }
     }
 }

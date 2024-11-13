@@ -48,9 +48,7 @@ namespace CCGLogic.Utils
                 int destinationInt = jsonArray[1].GetValue<int>();
                 int typeInt = jsonArray[2].GetValue<int>();
                 int operationInt = jsonArray[3].GetValue<int>();
-
-                JsonDocument document1 = JsonDocument.Parse(jsonArray[4].ToString());
-                JsonArray jsonArray1 = JsonDocumentToJsonArray(document1);
+                JsonArray jsonArray1 = StringToJsonArray(jsonArray[4].ToString());
 
                 if (!Enum.IsDefined(typeof(CmdWhere), sourceInt)) { return null; }
                 if (!Enum.IsDefined(typeof(CmdWhere), destinationInt)) { return null; }
