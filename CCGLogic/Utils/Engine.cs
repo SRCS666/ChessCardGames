@@ -17,7 +17,7 @@ namespace CCGLogic.Utils
         public Engine() => Random = new();
 
         public static string SelfReferenceName(GameType type) => type + "Self";
-        public static Version Version => new(1, 0, 0, VersionType.Alpha);
+        public static Version Version => new(0, 0, 1, VersionType.Alpha, 1);
 
         public static IEnumerable<byte[]> SplitMessage(byte[] message)
         {

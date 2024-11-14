@@ -26,7 +26,7 @@ namespace CCGLogic.Utils.Network
             try
             {
                 NetworkStream stream = tcpClient.GetStream();
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[2048];
                 int bytesRead;
 
                 while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)

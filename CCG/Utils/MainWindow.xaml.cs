@@ -24,6 +24,8 @@ namespace CCG.Utils
             Height = UIConfig.Instance.MWHeight;
             WindowState = UIConfig.Instance.MWState;
 
+            Title += " " + Engine.Version;
+
             CCGScene.Content = new MainMenuScene(this);
         }
 
